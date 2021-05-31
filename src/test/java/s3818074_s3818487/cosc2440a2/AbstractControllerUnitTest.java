@@ -223,49 +223,5 @@ public abstract class AbstractControllerUnitTest<T extends BaseEntity> {
                             .contentType(MediaType.APPLICATION_JSON_VALUE))
                     .andExpect(status().isOk()).andReturn();
         }
-
-        @Test
-        @DisplayName("[GET] Get all in page")
-        public void getAllInPageTest() {
-            List<T> data = populateListOfData();
-
-            when(repository.findAll()).thenReturn(data);
-            when(repository.findAll(PageRequest.of(0, 5))).thenReturn(new PageImpl<>(data));
-            Assertions.assertEquals(data.size(), controller.getAll(0).size());
-        }
-
-        @Test
-        @DisplayName("[GET][WEB] Get all in page")
-        public void getAllInPageTestWebLayer() throws Exception {
-            List<T> data = populateListOfData();
-            when(repository.findAll(PageRequest.of(0, 5))).thenReturn(new PageImpl<>(data));
-
-            mockMvc.perform(
-                    get("/" + endpoint).contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .param("page", "0"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(data.size())));
-        }
-    }
-
-    @Test
-    @DisplayName("[PATCH][ERROR][WEB] Update method throws data not found!")
-    public void updateByIdTestWebLayerThrowDataNotFound(String name) {
-        try {
-            UUID dataId = uuid();
-            T data = populateData();
-            data.setId(dataId);
-
-            String jsonRequest = om.writeValueAsString(data);
-            mockMvc.perform(
-                    patch("/" + endpoint + "/{id}", dataId)
-                            .content(jsonRequest)
-                            .contentType(MediaType.APPLICATION_JSON_VALUE))
-                    .andExpect(status().isOk()).andReturn();
-        } catch (Exception e) {
-            Assertions.assertEquals(e.getMessage(),
-                    "Request processing failed; nested exception is java.lang.RuntimeException: " + name + " not found!");
-        }
-
     }
 }
